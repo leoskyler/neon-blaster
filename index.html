@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Breakout: Evolution</title>
+    <!-- Retro Sci-Fi Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Cyberpunk Background Grid -->
+    <div class="cyber-grid"></div>
+    <div class="neon-glow-bg"></div>
+
+    <!-- Main Game Container -->
+    <div class="game-container">
+        
+        <!-- HUD (Heads-Up Display) -->
+        <div class="hud">
+            <div class="hud-item">SCORE: <span id="scoreVal">0000</span></div>
+            <div class="hud-item" id="powerupIndicator">SYSTEM: NOMINAL</div>
+            <div class="hud-item">LIVES: <span id="livesVal">❤❤❤</span></div>
+        </div>
+
+        <div class="canvas-wrapper">
+            <!-- The Game Canvas where all the action happens -->
+            <canvas id="gameCanvas" width="480" height="600"></canvas>
+
+            <!-- Screen 1: Start Menu Overlay -->
+            <div class="menu-overlay" id="startScreen">
+                <h1 class="game-title">NEON<br><span class="highlight">BREAKOUT</span></h1>
+                <p class="game-subtitle">EVOLUTION EDITION</p>
+                
+                <div class="instructions">
+                    <p>Drag / Swipe to move the Paddle</p>
+                    <p class="powerup-legend">
+                        🔴 Multi-Ball | 🟢 Laser Cannons | 🔵 Wide Paddle
+                    </p>
+                </div>
+
+                <button class="menu-btn" id="startBtn">INITIALIZE SYSTEM</button>
+            </div>
+
+            <!-- Screen 2: Game Over Overlay -->
+            <div class="menu-overlay hidden" id="gameOverScreen">
+                <h2 class="status-title error-text">SYSTEM FAILURE</h2>
+                <p class="final-score-text">FINAL SCORE: <span id="finalScoreVal">0</span></p>
+                <button class="menu-btn" id="retryBtn">REBOOT SYSTEM</button>
+            </div>
+
+            <!-- Screen 3: Victory Overlay -->
+            <div class="menu-overlay hidden" id="victoryScreen">
+                <h2 class="status-title success-text">GRID CLEARED</h2>
+                <p class="victory-sub">You have bypassed the firewall!</p>
+                <p class="final-score-text">FINAL SCORE: <span id="victoryScoreVal">0</span></p>
+                <button class="menu-btn" id="nextLevelBtn">NEXT SECTOR</button>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
 
