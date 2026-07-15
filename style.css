@@ -1,1 +1,258 @@
+:root {
+    --bg-dark: #05050a;
+    --neon-blue: #00f0ff;
+    --neon-blue-glow: rgba(0, 240, 255, 0.4);
+    --neon-pink: #ff007f;
+    --neon-pink-glow: rgba(255, 0, 127, 0.4);
+    --neon-green: #39ff14;
+    --neon-green-glow: rgba(57, 255, 20, 0.4);
+    --neon-yellow: #fffb00;
+    --text-color: #f0f0f5;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-color);
+    font-family: 'Orbitron', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Cyberpunk Background Grid & Glows */
+.cyber-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+.neon-glow-bg {
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
+    z-index: -1;
+    background: radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 127, 0.05) 0%, transparent 40%);
+    filter: blur(80px);
+}
+
+/* Main Container */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 480px;
+    padding: 10px;
+    z-index: 10;
+}
+
+/* HUD Panel */
+.hud {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px 15px;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.05);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.hud-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#scoreVal {
+    color: var(--neon-blue);
+    text-shadow: 0 0 5px var(--neon-blue-glow);
+}
+
+#powerupIndicator {
+    color: var(--neon-yellow);
+    animation: flash 1.5s infinite alternate;
+}
+
+#livesVal {
+    color: var(--neon-pink);
+    text-shadow: 0 0 5px var(--neon-pink-glow);
+    letter-spacing: 2px;
+}
+
+/* Game Canvas Wrapper */
+.canvas-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid var(--neon-blue);
+    border-radius: 12px;
+    box-shadow: 0 0 25px var(--neon-blue-glow);
+    overflow: hidden;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Overlay Screens (Start, Game Over, Victory) */
+.menu-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 5, 10, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    z-index: 20;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.menu-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Text Styles inside Overlays */
+.game-title {
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    margin-bottom: 5px;
+}
+
+.game-title .highlight {
+    color: var(--neon-pink);
+    text-shadow: 0 0 15px var(--neon-pink-glow);
+}
+
+.game-subtitle {
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--neon-blue);
+    margin-bottom: 40px;
+}
+
+.instructions {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    width: 90%;
+    margin-bottom: 40px;
+}
+
+.instructions p {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.powerup-legend {
+    margin-top: 10px;
+    font-size: 0.65rem !important;
+    color: var(--neon-yellow) !important;
+    font-weight: bold;
+}
+
+.status-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+}
+
+.error-text {
+    color: var(--neon-pink);
+    text-shadow: 0 0 15px var(--neon-pink-glow);
+}
+
+.success-text {
+    color: var(--neon-green);
+    text-shadow: 0 0 15px var(--neon-green-glow);
+}
+
+.victory-sub {
+    font-size: 0.8rem;
+    color: var(--neon-blue);
+    margin-bottom: 25px;
+}
+
+.final-score-text {
+    font-size: 1rem;
+    margin-bottom: 40px;
+}
+
+.final-score-text span {
+    color: var(--neon-yellow);
+    font-weight: bold;
+}
+
+/* Cyberpunk Buttons */
+.menu-btn {
+    background: transparent;
+    border: 2px solid var(--neon-blue);
+    color: #fff;
+    padding: 12px 30px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+}
+
+.menu-btn:hover {
+    background: var(--neon-blue);
+    color: var(--bg-dark);
+    box-shadow: 0 0 25px var(--neon-blue);
+    font-weight: 900;
+}
+
+/* Animations */
+@keyframes flash {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
 
