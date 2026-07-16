@@ -1,258 +1,260 @@
 :root {
-    --bg-dark: #05050a;
-    --neon-blue: #00f0ff;
-    --neon-blue-glow: rgba(0, 240, 255, 0.4);
-    --neon-pink: #ff007f;
-    --neon-pink-glow: rgba(255, 0, 127, 0.4);
-    --neon-green: #39ff14;
-    --neon-green-glow: rgba(57, 255, 20, 0.4);
-    --neon-yellow: #fffb00;
-    --text-color: #f0f0f5;
+    --bg-dark: #07070a;
+    --panel-chrome: #111218;
+    --panel-border: #1f212d;
+    
+    --neon-red: #ff2a5f;
+    --neon-red-glow: rgba(255, 42, 95, 0.4);
+    --neon-violet: #8a2be2;
+    --neon-violet-glow: rgba(138, 43, 226, 0.3);
+    --neon-cyan: #00f0ff;
+    
+    --text-main: #f0f1f7;
+    --text-muted: #53566a;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    touch-action: none; /* Prevents mobile double-tap zoom and scrolling during play */
     user-select: none;
     -webkit-user-select: none;
 }
 
 body {
     background-color: var(--bg-dark);
-    color: var(--text-color);
-    font-family: 'Orbitron', sans-serif;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    position: relative;
+    padding: 10px;
 }
 
-/* Cyberpunk Background Grid & Glows */
-.cyber-grid {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2;
-    background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
-    background-size: 30px 30px;
-}
-
-.neon-glow-bg {
-    position: absolute;
-    width: 150%;
-    height: 150%;
-    top: -25%;
-    left: -25%;
-    z-index: -1;
-    background: radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(255, 0, 127, 0.05) 0%, transparent 40%);
-    filter: blur(80px);
-}
-
-/* Main Container */
 .game-container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Scoreboard Panel */
+.game-header {
+    background-color: var(--panel-chrome);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    color: #fff;
+}
+
+.header-title .accent {
+    color: var(--neon-red);
+    text-shadow: 0 0 10px var(--neon-red-glow);
+}
+
+.header-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
-    width: 100%;
-    max-width: 480px;
-    padding: 10px;
-    z-index: 10;
+    gap: 4px;
 }
 
-/* HUD Panel */
-.hud {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(0, 240, 255, 0.15);
-    border-radius: 8px;
-    padding: 10px 15px;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.05);
-    font-size: 0.8rem;
+.stat-label {
+    font-size: 0.55rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+}
+
+.stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
+    color: var(--neon-cyan);
 }
 
-.hud-item {
+/* Custom Neon Hearts for Lives */
+.lives-container {
     display: flex;
-    align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
-#scoreVal {
-    color: var(--neon-blue);
-    text-shadow: 0 0 5px var(--neon-blue-glow);
+.heart-icon {
+    width: 12px;
+    height: 12px;
+    background-color: var(--neon-red);
+    position: relative;
+    transform: rotate(-45deg);
+    display: inline-block;
+    box-shadow: 0 0 8px var(--neon-red-glow);
 }
 
-#powerupIndicator {
-    color: var(--neon-yellow);
-    animation: flash 1.5s infinite alternate;
+.heart-icon::before,
+.heart-icon::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: var(--neon-red);
+    border-radius: 50%;
+    position: absolute;
 }
 
-#livesVal {
-    color: var(--neon-pink);
-    text-shadow: 0 0 5px var(--neon-pink-glow);
-    letter-spacing: 2px;
+.heart-icon::before {
+    top: -6px;
+    left: 0;
 }
 
-/* Game Canvas Wrapper */
+.heart-icon::after {
+    top: 0;
+    left: 6px;
+}
+
+.heart-icon.lost {
+    background-color: var(--text-muted);
+    box-shadow: none;
+}
+.heart-icon.lost::before,
+.heart-icon.lost::after {
+    background-color: var(--text-muted);
+}
+
+/* Main Canvas Wrapper */
 .canvas-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 5;
-    background: rgba(0, 0, 0, 0.85);
-    border: 2px solid var(--neon-blue);
-    border-radius: 12px;
-    box-shadow: 0 0 25px var(--neon-blue-glow);
+    aspect-ratio: 3 / 4; /* Perfect arcade gaming ratio */
+    background-color: #0b0c10;
+    border: 2px solid var(--panel-border);
+    border-radius: 24px;
     overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
 }
 
-canvas {
-    display: block;
+#gameCanvas {
     width: 100%;
     height: 100%;
+    display: block;
 }
 
-/* Overlay Screens (Start, Game Over, Victory) */
-.menu-overlay {
+/* Overlay Interface Screens */
+.overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(5, 5, 10, 0.95);
+    background-color: rgba(7, 7, 10, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center;
-    padding: 20px;
-    z-index: 20;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.menu-overlay.hidden {
     opacity: 0;
-    visibility: hidden;
     pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
 }
 
-/* Text Styles inside Overlays */
-.game-title {
-    font-size: 2.2rem;
+.overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.overlay-content {
+    text-align: center;
+    padding: 30px;
+    width: 85%;
+}
+
+.overlay-content h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
     font-weight: 900;
-    line-height: 1.1;
     letter-spacing: 0.1em;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    margin-bottom: 5px;
+    margin-bottom: 12px;
+    color: var(--text-main);
 }
 
-.game-title .highlight {
-    color: var(--neon-pink);
-    text-shadow: 0 0 15px var(--neon-pink-glow);
-}
-
-.game-subtitle {
-    font-size: 0.75rem;
-    letter-spacing: 0.3em;
-    color: var(--neon-blue);
-    margin-bottom: 40px;
-}
-
-.instructions {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 15px;
-    width: 90%;
-    margin-bottom: 40px;
-}
-
-.instructions p {
-    font-size: 0.75rem;
-    line-height: 1.6;
-    color: var(--text-muted);
-}
-
-.powerup-legend {
-    margin-top: 10px;
-    font-size: 0.65rem !important;
-    color: var(--neon-yellow) !important;
-    font-weight: bold;
-}
-
-.status-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    letter-spacing: -1px;
-}
-
-.error-text {
-    color: var(--neon-pink);
-    text-shadow: 0 0 15px var(--neon-pink-glow);
-}
-
-.success-text {
-    color: var(--neon-green);
-    text-shadow: 0 0 15px var(--neon-green-glow);
-}
-
-.victory-sub {
+.overlay-content p {
     font-size: 0.8rem;
-    color: var(--neon-blue);
+    color: var(--text-muted);
+    line-height: 1.6;
     margin-bottom: 25px;
 }
 
-.final-score-text {
-    font-size: 1rem;
-    margin-bottom: 40px;
+.lost-text {
+    color: var(--neon-red) !important;
+    text-shadow: 0 0 15px var(--neon-red-glow);
 }
 
-.final-score-text span {
-    color: var(--neon-yellow);
-    font-weight: bold;
+.win-text {
+    color: var(--neon-cyan) !important;
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
 }
 
-/* Cyberpunk Buttons */
-.menu-btn {
+/* Rebuilt Premium Action Buttons */
+.action-btn {
     background: transparent;
-    border: 2px solid var(--neon-blue);
-    color: #fff;
-    padding: 12px 30px;
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
     font-family: 'Orbitron', sans-serif;
     font-size: 0.85rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    border-radius: 6px;
+    padding: 14px 28px;
+    border-radius: 12px;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
+    letter-spacing: 0.1em;
     transition: all 0.2s ease;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
 }
 
-.menu-btn:hover {
-    background: var(--neon-blue);
-    color: var(--bg-dark);
-    box-shadow: 0 0 25px var(--neon-blue);
-    font-weight: 900;
+.action-btn:hover {
+    background: var(--neon-cyan);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
 }
 
-/* Animations */
-@keyframes flash {
-    0% { opacity: 0.5; }
-    100% { opacity: 1; }
+.action-btn.retry {
+    border-color: var(--neon-red);
+    color: var(--neon-red);
+    box-shadow: 0 0 15px var(--neon-red-glow);
+}
+.action-btn.retry:hover {
+    background: var(--neon-red);
+    color: #000;
+    box-shadow: 0 0 25px rgba(255, 42, 95, 0.6);
 }
 
+.action-btn.win {
+    border-color: var(--neon-violet);
+    color: var(--neon-violet);
+    box-shadow: 0 0 15px var(--neon-violet-glow);
+}
+.action-btn.win:hover {
+    background: var(--neon-violet);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(138, 43, 226, 0.6);
+}
+
+.game-footer {
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+}
