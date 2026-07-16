@@ -6,7 +6,105 @@ let score = 0;
 let lives = 3;
 let isPlaying = false;
 let screenShake = 0;
-let comboCount = 0; // Tracks consecutive brick hits
+let comboCount = 0; 
+
+// --- Browser-Native Audio Synthesizer Engine ---
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+// Play sound when ball hits the paddle (Laser-like Synth)
+function playPaddleSound() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.08);
+    
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+}
+
+// Play sound on brick collision (Pop Synth with combo pitch scaling)
+function playBrickSound() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = 'sine';
+    // Pitch gets sharper as your combo streak increases!
+    const baseFreq = 400 + (comboCount * 60);
+    osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq / 2, audioCtx.currentTime + 0.06);
+    
+    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.08);
+}
+
+// Play sound on catching a Power-Up capsule (Upward Chime)
+function playPowerupSound() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    
+    // Quick dual-note sweep
+    [523.25, 659.25].forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + (idx * 0.06));
+        
+        gainNode.gain.setValueAtTime(0.15, now + (idx * 0.06));
+        gainNode.gain.linearRampToValueAtTime(0.01, now + (idx * 0.06) + 0.15);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start(now + (idx * 0.06));
+        osc.stop(now + (idx * 0.06) + 0.15);
+    });
+}
+
+// Play sound on ball death / falling (Descending Sweep)
+function playDeathSound() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.4);
+    
+    gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.4);
+}
 
 // High-DPI Resolution Setup
 function scaleCanvas() {
@@ -31,7 +129,7 @@ const paddle = {
     x: 0, 
     y: 0, 
     color: "#00f0ff",
-    powerUpTimer: 0 // Track active power-up duration
+    powerUpTimer: 0 
 };
 
 // 2. Ball Object
@@ -42,7 +140,7 @@ const ball = {
     dx: 0,
     dy: 0,
     startSpeed: 4.5,
-    speed: 4.5, // Will dynamically scale up
+    speed: 4.5, 
     color: "#ff2a5f"
 };
 
@@ -104,14 +202,13 @@ function spawnExplosion(x, y, color, count = 12) {
 // 5. Power-Up System
 let powerUps = [];
 function spawnPowerUp(x, y) {
-    // 15% chance to drop a power-up capsule
     if (Math.random() < 0.15) {
         powerUps.push({
             x: x,
             y: y,
             width: 16,
             height: 16,
-            vy: 2.2, // Gravity speed
+            vy: 2.2, 
             color: "#00f0ff"
         });
     }
@@ -172,15 +269,18 @@ function checkCollisions() {
         ball.dx = -ball.dx;
         ball.x = ball.x < 0 ? ball.radius : virtualWidth - ball.radius;
         screenShake = 4;
+        playPaddleSound();
     }
     if (ball.y - ball.radius < 0) {
         ball.dy = -ball.dy;
         ball.y = ball.radius;
         screenShake = 4;
+        playPaddleSound();
     }
 
     // Ball drops off bottom
     if (ball.y + ball.radius > virtualHeight) {
+        playDeathSound();
         lives--;
         updateLivesDisplay();
         screenShake = 15;
@@ -197,17 +297,14 @@ function checkCollisions() {
         ball.x >= paddle.x && 
         ball.x <= paddle.x + paddle.width) {
         
-        // Reset combo tracker when you catch the ball
         comboCount = 0;
-
         ball.dy = -ball.speed;
         
         const hitPoint = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
         ball.dx = hitPoint * ball.speed;
         
         screenShake = 6;
-        
-        // Quick flare particles off the paddle
+        playPaddleSound();
         spawnExplosion(ball.x, paddle.y, paddle.color, 4);
     }
 
@@ -228,16 +325,15 @@ function checkCollisions() {
                 ball.dy = -ball.dy;
                 b.hp--;
                 
-                // Build Combo Multiplier
                 comboCount++;
                 const pointGain = 10 * comboCount;
                 score += pointGain;
                 document.getElementById("scoreVal").innerText = score.toString().padStart(4, "0");
                 
-                // Gradually increase speed with every hit to ramp up difficulty
                 ball.speed = Math.min(ball.startSpeed + (score * 0.001), 7.5);
 
                 screenShake = 5 + comboCount;
+                playBrickSound();
 
                 if (b.hp <= 0) {
                     b.active = false;
@@ -254,24 +350,22 @@ function checkCollisions() {
         const p = powerUps[i];
         p.y += p.vy;
 
-        // Catch check
         if (p.y + p.height >= paddle.y &&
             p.y <= paddle.y + paddle.height &&
             p.x + p.width >= paddle.x &&
             p.x <= paddle.x + paddle.width) {
             
-            // Activate "Plasma Expand" 1.5x Wide Paddle
             paddle.width = paddle.baseWidth * 1.5;
-            paddle.powerUpTimer = 480; // ~8 seconds at 60fps
-            paddle.color = "#00ffaa"; // Changes to a bright mint color
+            paddle.powerUpTimer = 480; 
+            paddle.color = "#00ffaa"; 
             
             screenShake = 10;
+            playPowerupSound();
             spawnExplosion(p.x, paddle.y, "#00ffaa", 15);
             powerUps.splice(i, 1);
             continue;
         }
 
-        // Out of bounds cleanup
         if (p.y > virtualHeight) {
             powerUps.splice(i, 1);
         }
@@ -303,7 +397,6 @@ function draw() {
     const virtualWidth = canvas.width / window.devicePixelRatio;
     const virtualHeight = canvas.height / window.devicePixelRatio;
 
-    // Handle Active Powerup Timer Degeneration
     if (paddle.powerUpTimer > 0) {
         paddle.powerUpTimer--;
         if (paddle.powerUpTimer <= 0) {
@@ -358,7 +451,6 @@ function draw() {
         ctx.shadowColor = p.color;
         ctx.fillStyle = p.color;
         
-        // Cute triangular capsule look
         ctx.beginPath();
         ctx.moveTo(p.x, p.y + p.height);
         ctx.lineTo(p.x + p.width / 2, p.y);
@@ -385,7 +477,6 @@ function draw() {
     });
     ctx.globalAlpha = 1.0;
 
-    // Show Floating Combo Banner if you hit a streak!
     if (comboCount > 1) {
         ctx.fillStyle = "#fff";
         ctx.font = "900 12px 'Orbitron', sans-serif";
@@ -393,7 +484,6 @@ function draw() {
         ctx.fillText(`${comboCount}X COMBO`, ball.x, ball.y - 15);
     }
 
-    // Update ball mechanics
     ball.x += ball.dx;
     ball.y += ball.dy;
 
@@ -404,6 +494,7 @@ function draw() {
 // --- Menu Controls ---
 
 function startGame() {
+    initAudio(); // Active Audio System
     document.querySelectorAll(".overlay").forEach(o => o.classList.remove("active"));
     isPlaying = true;
     score = 0;
